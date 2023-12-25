@@ -1,93 +1,121 @@
-import React, { useState } from 'react';
-import classes from './Login.module.css';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { authAction } from "../store/authSlice" 
+import React, { useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError]= useState("");
-  const navigate= useNavigate();
-  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = async(e) => {
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true)
-    
-    if(!email || !password ){
+
+    if (!email || !password) {
       setError("All fields are mandatory!!");
-      return
+      return;
     }
 
     try {
-    const res= await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyA7YeTd7ZFDkf2KAhcUDB9mUbPhpalT1Kk', {
-      method:'POST',
-      body: JSON.stringify({
-        email:email,
-        password:password,
-        returnSecureToken: true
-      }),
-      headers: {
-        'content-type' : 'application/json'
+      const res = await fetch("http://localhost:30001/user/createLogin", {
+        method: "POST",
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          returnSecureToken: true,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.status == 404) {
+        console.log(` Error :${res.statusText} ,user not found`);
       }
-    })
-     if(res.ok){
-        setLoading(false);
-        const data= await res.json()
-        dispatch(authAction.login(data.idToken));
-        localStorage.setItem("email", data.email.replace(/[@.]/g, ""));
-        localStorage.setItem("token", data.idToken);          
-        console.log('User LoggedIn successfully');
-        navigate('/home');
-        }
-        else{
-            setLoading(false);
-          const data= await res.json();
-            if(data && data.error.message){
-              setError("Login not successful- " + data.error.message)
-            } else{
-              setError("Some error occured!! Please try again..")
-            }
-          }
+      if (res.status == 401) {
+        console.log(` Error :${res.statusText} ,invalid password`);
+      }
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("token", JSON.stringify(data));
+        console.log(data);
+        navigate("/expense");
+      } else {
+        const data = await res.json();
+      }
     } catch (error) {
-      console.error('Error logging in :', error);
+      console.error("Error logging in :", error);
     }
-    setEmail('');
+    setEmail("");
     setPassword("");
-    
   };
 
   return (
-    <div className={classes.container}>
 
-      <form className={classes.loginForm} onSubmit={handleLogin}>
-        <h2>Login</h2>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <br></br>
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <p className={classes.errorMessage}>{error}</p>
-        {!loading && <button type="submit">Login</button>}
-        {loading && <h2>Submitting Data...</h2>}
-        <div className={classes.forgotPasswordLink}>
-          <Link to="/forgetpassword">Forgot Password?</Link>
+    <section class="vh-100">
+      <div class="container py-5 h-100">
+        <div class="row d-flex align-items-center justify-content-center h-100">
+          <div class="col-md-8 col-lg-7 col-xl-6">
+            <img
+              src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.svg"
+              class="img-fluid"
+              alt="Phone image"
+            />
+          </div>
+          <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+            <h4> Welcome again to Expense-Tracker</h4>
+            <form onSubmit={(e) => handleLogin(e)}>
+              <div class="form-outline mb-4">
+                <input
+                  type="email"
+                  id="form1Example13"
+                  class="form-control form-control-lg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <label class="form-label" for="form1Example13">
+                  Email address
+                </label>
+              </div>
+
+              <div class="form-outline mb-4">
+                <input
+                  type="password"
+                  id="form1Example23"
+                  class="form-control form-control-lg"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <label class="form-label" for="form1Example23">
+                  Password
+                </label>
+              </div>
+            
+
+              <div class="d-flex justify-content-around align-items-center mb-4">
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    value=""
+                    id="form1Example3"
+                    checked
+                  />
+                  <label class="form-check-label" for="form1Example3">
+                    {" "}
+                    Remember me{" "}
+                  </label>
+                </div>
+                <NavLink to="/forgot">Forgot password?</NavLink>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg btn-block">
+                Sign in
+              </button>
+            </form>
+          </div>
         </div>
-        <div className={classes.signupLink}>
-          <Link to="/"><p>Don't have an account? Sign Up.</p></Link>
-        </div>
-      </form>
-    </div>
+      </div>
+    </section>
   );
 }
 

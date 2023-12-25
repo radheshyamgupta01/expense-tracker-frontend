@@ -1,53 +1,39 @@
-// import React from 'react';
-// import styles from './ExpenseList.module.css';
+import React, { useState } from "react";
 
-// const ExpenseList = (props) => {
-//   return (
-//     <div className={styles.expenseList}>
-     
-//       <ul>
-//         {props.expenses.map((expense, index) => (
-//           <li key={index} className={styles.expenseItem} id={expense.id}>
-//             <span className={styles.expenseCategory}>{expense.category}</span>
-//             <span className={styles.expenseDescription}>{expense.description}</span>
-//             <span className={styles.expenseAmount}>Rs.{expense.amount}</span>
-//             <button onClick={() => props.editHandler(expense.id)} className={styles.editBtn}>
-//           Edit
-//         </button>
-//         <button onClick={() => props.deleteHandler(expense.id)} className={styles.deleteBtn}>
-//           Delete
-//         </button>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
+const ExpenseList = ({expenses, deleteHandler,editHandler,currentExpenses}) => {
 
-import React from 'react';
-import './Expense.css';
-
-const ExpenseList = (props) => {
+ 
   return (
-    <div className="expenseList">
-      <table className="expenseTable">
+    <div className="bg-light mt-4 overflow-x-auto">
+      <table className="table table-bordered">
         <thead>
-          <tr>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Actions</th>
+          <tr className="bg-secondary text-white">
+            <th className="py-2 px-4" style={{fontFamily:"Sofia"}}>Category</th>
+            <th className="py-2 px-4" style={{fontFamily:"Sofia"}}>Description</th>
+            <th className="py-2 px-4" style={{fontFamily:"Sofia"}}>Amount</th>
+            <th className="py-2 px-4" style={{fontFamily:"Sofia"}}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {props.expenses.map((expense, index) => (
-            <tr key={index}>
-              <td className="text-font">{expense.category}</td>
-              <td className="text-font">{expense.description}</td>
-              <td className="text-font">Rs.{expense.amount}</td>
-              <td>
-                <button className="edit" onClick={() => props.editHandler(expense.id)}>Edit</button>
-                <button className="delet" onClick={() => props.deleteHandler(expense.id)}>Delete</button>
+          {currentExpenses.map((expense, index) => (
+            <tr key={index} className="text-center">
+              <td className="py-2 px-4 " style={{fontFamily:"Sofia"}}>{expense.catogary}</td>
+              <td className="py-2 px-4" style={{fontFamily:"Sofia"}}>{expense.description}</td>
+              <td className="py-2 px-4" style={{fontFamily:"Sofia"}}>Rs.{expense.amount}</td>
+              <td className="py-2 px-4 " style={{fontFamily:"Sofia"}}>
+                <button
+                  className="btn btn-primary me-2  text-shadow: 3px 3px 3px #ababab"
+                  style={{fontFamily:"Sofia"}}
+                  onClick={() => editHandler(expense.id)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => deleteHandler(expense.id)}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
@@ -58,4 +44,3 @@ const ExpenseList = (props) => {
 };
 
 export default ExpenseList;
-

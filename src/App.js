@@ -1,32 +1,51 @@
-import React from 'react'
-import Navbar from "./components/Navbar";
-import Expense from "./components/expenses/Expense";
-import ForgetPassword from "./pages/ForgetPassword";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Carosal from "./HeroSection/Carosal";
+import Card from "./HeroSection/Card";
+import Footer from "./HeroSection/Footer";
+import OffCanvas from "./HeroSection/Offcanvash";
+import Header from "./HeroSection/Header";
 import Signup from "./pages/Signup";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useSelector } from 'react-redux';
-
+import Login from "./pages/Login";
+import Home from "./HeroSection/Home";
+import Expenses from "./components/expenses/ExpenseForm";
+import Expense from "./components/expenses/Expense"
+ import UsernameInput from "./RagistrationInput/EmailInput";
+import PasswordInput from "./RagistrationInput/PasswordInput";
+import SubmitButton from "./RagistrationInput/SubmitButton";
+import Ragistration from "./RagistrationInput/Ragistration";
+import RegistrationForm from "./RagistrationInput/User";
+import Profile from "./components/expenses/Profile";
+import ResetPasswordForm from "./pages/ResetPassForm";
+import Forget from "./pages/Forgot";
+import Dashboard from "./components/Dashboard/Dashboard";
 function App() {
-  const isLoggedIn= useSelector((state) => state.authReducer.isLoggedin);
-  console.log(isLoggedIn);
-
   return (
-    <BrowserRouter>
-    <Navbar/>
-    <Routes>
-   {!isLoggedIn && <Route path="/" exact element={ <Signup/>}/>}
-   {<Route path="/login" element={<Login/>}/>}
-    <Route path="/home" element={<Home/>}/>
-   {isLoggedIn && <Route path="/profile" element={<Profile/>}/>}
-   {isLoggedIn && <Route path="/expense" element={<Expense/>}/>}
-   <Route path="/forgetpassword" element={<ForgetPassword/>}/>
-   <Route path='*' element={<Navigate to='/login'/>}/>
-    </Routes>  
-    </BrowserRouter>
+    <Router>
+      {/* Common layout components (Header, Carosal, Card, etc.) */}
+     
+   
+    
+      {/* Define routes */}
+      <Routes>
+        
+        <Route path="/" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home/>} />
+        <Route path="/expense" element={<Expense></Expense>} />
+       
+        <Route path="/forgot" element={<Forget></Forget>}></Route>
+        <Route path="/dashboard" element={<Dashboard></Dashboard>}></Route>
+        <Route path="/password/resetpassword/:resetId/:token" element={< ResetPasswordForm></ResetPasswordForm>} />
+
+      </Routes>
+
+      {/* Footer component */}
+     
+    </Router>
+    
   );
 }
 
 export default App;
+

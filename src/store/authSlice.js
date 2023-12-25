@@ -24,3 +24,17 @@ const authSlice = createSlice({
 export const authAction = authSlice.actions;
 
 export default authSlice.reducer;
+// import { createSlice } from "@reduxjs/toolkit";
+// const authSlice=createSlice({
+//   initialState:"",
+//   reducers:{
+//     login(){
+
+//     },
+//     logout(){
+
+//     }
+//   }
+// })
+// export const authaction=authSlice.actions;
+// export const authReducer=authSlice.reducer
