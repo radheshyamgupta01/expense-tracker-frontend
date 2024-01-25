@@ -1,48 +1,163 @@
 import React, { useState, useEffect } from "react";
-import DateRangeSelector from "./DateRangeSelector";
-import ExpenseIncomeChart from "./ExpenseIncomeChart";
+
 import DownloadButton from "./DownloadButton";
+import { NavLink } from "react-router-dom";
 import "./Dashboard.css";
-import Footer from "./Footer";
-const Dashboard = () => {
-  const [selectedDateRange, setSelectedDateRange] = useState("monthly");
-  const [expenses, setExpenses] = useState([50, 30, 20]); // Example data
-  const [incomes, setIncomes] = useState([100, 80, 50]); // Example data
+import Footer from "../Footer/../Footer/Footer";
+import { RiMoneyEuroCircleFill } from "react-icons/ri";
+import { FcBusinessman } from "react-icons/fc";
+import { isSameDay, isSameWeek, isSameMonth } from "date-fns";
+import { IoPersonCircle } from "react-icons/io5";
+import { responsivePropType } from "react-bootstrap/esm/createUtilityClasses";
+import { Button } from "react-bootstrap";
+import Calendar from "./Calendar/Calender";
+import MyCalendar from "./Calendar/Calender";
+import Ctx from "../Contex/Contex";
+import { useContext } from "react";
+const Dashboard = ({ date }) => {
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState("weekly");
+  const {
+    resDatAHandler,
+    resData,
+    amountHandler,
+    amountData,
+    yearlyTotalExpense,
+    yearlyExpenseData,
+    weeklyExpense,
+    weeklyTotalExpense,
+    yearlyExpenseHandler,
+    yearlyTotalExpenseHandler,
+    weeklyExpenseHandler,
+    weeklyTotalExpenseHandler,
+    getExpenseDataHandler,
+    expenseData,
+  } = useContext(Ctx);
+  const [transactions, setTransactions] = useState([]);
   const [isPremiumUser, setIsPremiumUser] = useState(true);
+  const [totalIncoomeData, setTotalIncomeData] = useState(0);
+  const [totalProfit, setProfit] = useState(0);
+  const [data, setData] = useState([]);
+  const [calendar, setCalendar] = useState(false);
+  const storedData = JSON.parse(localStorage.getItem("token"));
+  const token = storedData.token;
+  const [selectedData, setSelectedData] = useState(null);
+  const monthlyReportHandler = () => {
+    setCalendar(true);
+    setSelectedTimePeriod("monthly");
+    handleSelection("monthly");
+  };
+  const YearlyReportHandler = () => {
+    setCalendar(true);
+    setSelectedTimePeriod("yearly");
+    handleSelection("yearly");
+  };
+  const WeeklyReportHandler = () => {
+    setCalendar(true);
+    setSelectedTimePeriod("weekly");
+    handleSelection("weekly");
+  };
+  const handleSelection = (data) => {
+    setSelectedData(data);
+  };
+  const getAllMonthlyReportHandler = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:30001/expense/getAllMonthlyIncome",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      resDatAHandler(responseData.monthlyData);
+      amountHandler(responseData.monthlyExpense);
+    } catch (err) {
+      console.error("Error fetching monthly income:", err);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:30001/expense/totalExpense/${token}`,
+        {
+          method: "get",
+        }
+      );
+      const data = await response.json();
+
+      setTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
 
   useEffect(() => {
-    // Fetch expenses and incomes based on selectedDateRange
-    // Update state variables
-  }, [selectedDateRange]);
+    fetchTransactions();
+  }, []);
 
+  const getIncome = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:30001/expense/getIncome/${token}`,
+        {
+          method: "get",
+        }
+      );
+      const data = await response.json();
+      setTotalIncomeData(data);
+      console.log(data, "this is getting  income data");
+    } catch (err) {
+      console.log("getting some error", err);
+    }
+  };
+  useEffect(() => {
+    getIncome();
+  }, []);
+  const getProfit = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:30001/expense/getprofit/${token}`,
+        {
+          method: "get",
+        }
+      );
+      const data = await response.json();
+      setProfit(data);
+      console.log(data, "this is getting  income data");
+    } catch (err) {
+      console.log("getting some error", err);
+    }
+  };
+  useEffect(() => {
+    getProfit();
+  }, []);
+  console.log(resData, "this  is res data");
+  const settingHandler = () => {
+    window.location.href = "/expense";
+  };
   return (
     <>
-      <div className="bg-light">
-        {/* <!--Main Navigation--> */}
-        <header>
-          {/* <!-- Sidebar --> */}
-          <nav
-            id="sidebarMenu"
-            class="collapse d-lg-block sidebar collapse bg-light"
-          >
-            <div class="position-sticky">
-              <div class="list-group list-group-flush mx-3 mt-4">
-                <a
-                  href="#"
-                  class="list-group-item list-group-item-action py-2 ripple"
+      <div className="bg-green" style={{ background: '#2c3e50' }}>
+        <header style={{ fontFamily: "sanserif", marginRight: "10px",background: '#2c3e50' }}>
+          <nav class="collapse d-lg-block sidebar collapse bg-light" style={{ background: '#2c3e50' }}>
+            <div class="position-sticky"   style={{ background: '#2c3e50' }}>
+              <div class="list-group list-group-flush mx-3 ">
+                <div
+                  class=" list-group-item-action py-2 ripple"
                   aria-current="true"
-                >
-                  <i class="fa-solid fa-address-card"></i>
+                ></div>
 
-                  <span className="px-2">User Profile</span>
-                </a>
-
-                <a
-                  href="#"
-                  class="list-group-item list-group-item-action py-2 ripple"
-                >
-                  <div class="card">
-                    <div class="card-body">
+                <div class="list-group-item-action py-2 ripple"   style={{ background: '#2c3e50' }}>
+                  <div class="card" style={{ background: '#2c3e50' }}>
+                    <div class="card-body" style={{ background: '#2c3e50' }}>
                       <div class="col">
                         <img
                           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUzTl9iPM9GYuyAyhNDR-JiJxL8KUgWUSLlueSAiBaJg&s"
@@ -50,49 +165,61 @@ const Dashboard = () => {
                           alt="..."
                         />
                       </div>
-                      <h5 class="card-title "> Name:Arjun</h5>
-                      <p class="card-text">Position:Frontend Developer</p>
-                      <a href="#" class="btn btn-primary">
+                      <h5 class="card-title text-white ">Name - Radheshyam </h5>
+                      <p class="card-text text-white">Full Stack Developer</p>
+                      <p class="card-text text-white">India ,Mumbai</p>
+                      <div
+                        class="btn btn-primary"
+                        onClick={() => settingHandler()}
+                      >
                         Edit
-                      </a>
+                      </div>
                     </div>
                   </div>
+                </div>
+
+                <a
+                  className=" list-group-item py-2 ripple text-black btn-light"
+                  // style={{ textDecoration: "none", backgroundColor: "#f4f4f4" }}
+                  style={{ background: '#2c3e50' }}
+                >
+                  <i className="fas fa-cog fa-fw me-3 text-white"></i>
+                  <span className="text-white" onClick={() => settingHandler()}>
+                    Expense
+                  </span>
                 </a>
                 <a
-                  href="#"
-                  className="list-group-item list-group-item-action py-2 ripple"
+                  href="/dynamiccal"
+                  class=" list-group-item py-2 ripple btn-light"
+                  // style={{
+                  //   textDecoration: "none ",
+                  //   backgroundColor: "#f3f3f3",
+                  // }}
+                  style={{ background: '#2c3e50' }}
                 >
-                  <i className="fas fa-cog fa-fw me-3"></i>
-                  <span>Settings</span>
+                  <i className="fas fa-calendar fa-fw me-3 text-white"></i>
+
+                  <span className="text-white">Calendar</span>
                 </a>
 
                 <a
-                  href="#"
-                  class="list-group-item list-group-item-action py-2 ripple"
+                  href="/login"
+                  className=" list-group-item list-group  ripple btn-light bg-btn-light text-white "
+                  // style={{ textDecoration: "none", backgroundColor: "#f3f3f3" }}
+                  style={{ background: '#2c3e50' }}
                 >
-                  <i class="fas fa-calendar fa-fw me-3"></i>
-                  <span>Calendar</span>
-                </a>
-                <a
-                  href="#"
-                  className="list-group-item list-group-item-action py-2 ripple"
-                >
-                  <i className="fas fa-sign-out-alt fa-fw me-3"></i>
-                  <span>Logout</span>
+                  <i className="fas fa-sign-out-alt fa-fw me-3 text-black bg-btn-light"></i>
+                  <span className="text-white">Logout</span>
                 </a>
               </div>
             </div>
           </nav>
-          {/* <!-- Sidebar -->
 
-  <!-- Navbar --> */}
           <nav
-            id="main-navbar"
-            class="navbar navbar-expand-lg navbar-light bg-light fixed-top shadow"
+             style={{ background: '#2c3e50' }}
+            class="navbar navbar-expand-lg navbar-light  fixed-top border"
           >
-            {/* <!-- Container wrapper --> */}
-            <div class="container-fluid">
-              {/* <!-- Toggle button --> */}
+            <div class="container-fluid" style={{ background: '#2c3e50' }} >
               <button
                 class="navbar-toggler"
                 type="button"
@@ -104,21 +231,15 @@ const Dashboard = () => {
               >
                 <i class="fas fa-bars"></i>
               </button>
-
-              {/* <!-- Brand --> */}
               <a class="navbar-brand" href="#">
-              <i class="fa-solid fa-money-check-dollar"></i>
+                <RiMoneyEuroCircleFill size={32} />
               </a>
-              
-
-              {/* <!-- Right links --> */}
-              <ul class="navbar-nav ms-auto d-flex flex-row">
-                {/* <!-- Notification dropdown --> */}
+              <ul class="navbar-nav ms-auto d-flex flex-row"   style={{ background: '#2c3e50' }}>
                 <li class="nav-item dropdown">
                   <a
                     class="nav-link me-3 me-lg-0 dropdown-toggle hidden-arrow"
                     href="#"
-                    id="navbarDropdownMenuLink"
+                  
                     role="button"
                     data-mdb-toggle="dropdown"
                     aria-expanded="false"
@@ -131,108 +252,23 @@ const Dashboard = () => {
                   <ul
                     class="dropdown-menu dropdown-menu-end"
                     aria-labelledby="navbarDropdownMenuLink"
-                  >
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Some news
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Another news
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Something else here
-                      </a>
-                    </li>
-                  </ul>
+                  ></ul>
                 </li>
 
-                {/* <!-- Icon --> */}
-                <li class="nav-item">
-                  <a class="nav-link me-3 me-lg-0" href="#">
-                    <i class="fas fa-fill-drip"></i>
-                  </a>
-                </li>
-                {/* <!-- Icon --> */}
+            
+              
                 <li class="nav-item me-3 me-lg-0">
                   <a class="nav-link" href="#">
                     <i class="fab fa-github"></i>
                   </a>
                 </li>
+             
 
-                {/* <!-- Icon dropdown --> */}
-                <li class="nav-item dropdown">
-                  <a
-                    class="nav-link me-3 me-lg-0 dropdown-toggle hidden-arrow"
-                    href="#"
-                    id="navbarDropdown"
-                    role="button"
-                    data-mdb-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <i class="flag-united-kingdom flag m-0"></i>
-                  </a>
-                  <ul
-                    class="dropdown-menu dropdown-menu-end"
-                    aria-labelledby="navbarDropdown"
-                  >
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-united-kingdom flag"></i>English
-                        <i class="fa fa-check text-success ms-2"></i>
-                      </a>
-                    </li>
-                    <li>
-                      <hr class="dropdown-divider" />
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-poland flag"></i>Polski
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-china flag"></i>中文
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-japan flag"></i>日本語
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-germany flag"></i>Deutsch
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-france flag"></i>Français
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-spain flag"></i>Español
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        <i class="flag-russia flag"></i>Русский
-                      </a>
-                    </li>
-                  
-                  </ul>
-                </li>
-
-                {/* <!-- Avatar --> */}
                 <li class="nav-item dropdown">
                   <a
                     class="nav-link dropdown-toggle hidden-arrow d-flex align-items-center"
                     href="#"
-                    id="navbarDropdownMenuLink"
+                   
                     role="button"
                     data-mdb-toggle="dropdown"
                     aria-expanded="false"
@@ -250,107 +286,144 @@ const Dashboard = () => {
                     aria-labelledby="navbarDropdownMenuLink"
                   >
                     <li>
-                      <div class="card" style={{ width: " 18rem" }}>
-                        <div class="card-body">
-                          <h5 class="card-title">Total Expense</h5>
-                          <p class="card-text">250</p>
-                          <a href="#" class="btn btn-primary">
-                            Go somewhere
-                          </a>
-                        </div>
-                      </div>
+                      <NavLink to="/setting">Settings</NavLink>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="#">
-                        Settings
-                      </a>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="#">
-                        Logout
-                      </a>
+                      <NavLink to="/login">Logout</NavLink>
                     </li>
                   </ul>
                 </li>
               </ul>
             </div>
-            {/* <!-- Container wrapper --> */}
           </nav>
-          {/* <!-- Navbar --> */}
         </header>
-        {/* <!--Main Navigation--> */}
-        {/* <!-- Navbar --> */}
 
-{/* <!-- Navbar --> */}
-        {/* <!--Main layout--> */}
         <main style={{ marginTop: "58px" }}>
-          
           <div class="container pt-4">
+            <div>
+              {calendar && (
+                <MyCalendar
+                  setCalendar={setCalendar}
+                  monthlyReportHandler={monthlyReportHandler}
+                  YearlyReportHandler={YearlyReportHandler}
+                ></MyCalendar>
+              )}
+            </div>
+
             <nav id="navbar-example2" class="navbar bg-body-tertiary px-3 mb-3">
-              <a class="navbar-brand text-info text-muted" href="#">
-                Dashboard
-                
-              </a>
-              
-              
-              <ul class="nav nav-pills">
-                <li class="nav-item">
-                  <a class="nav-link" href="#scrollspyHeading1">
-                    {" "}
-                    Daily Report{" "}
-                  </a>
+              <a class="navbar-brand text-info text-muted"   style={{ fontFamily: "sanserif", marginRight: "10px" }}>Dashboard</a>
+
+              <ul className="nav nav-pills">
+                <li className="nav-item ">
+                  <button
+                    style={{ fontFamily: "sanserif", marginRight: "10px" 
+                   ,background: '#2c3e50' }}
+                    className=" btn btn-primary ms-2 me-2 text-white"
+                    onClick={WeeklyReportHandler}
+                  >
+                    Weekly Report
+                  </button>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#scrollspyHeading2">
-                    {" "}
+                <li className="nav-item">
+                  <button
+                    style={{ fontFamily: "sanserif", marginRight: "10px" 
+                   , background: '#2c3e50' }}
+                    className=" btn btn-primary ms-2 me-2 text-white"
+                    onClick={() => monthlyReportHandler()}
+                  >
                     Monthly Report
-                  </a>
+                  </button>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#scrollspyHeading2">
-                    {" "}
+                <li className="nav-item ">
+                  <button
+                    style={{ fontFamily: "sanserif", marginRight: "10px", background: '#2c3e50' }}
+                    className=" btn  btn-primary ms-2 me-2 text-white"
+                    onClick={() => YearlyReportHandler()}
+                  >
                     Yearly Report
-                  </a>
+                  </button>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#scrollspyHeading2">
-                    {" "}
-                    <DownloadButton isPremiumUser={isPremiumUser} />
-                  </a>
+                <li className="">
+                  {selectedData && (
+                    <>
+                      {selectedData === "weekly" &&
+                        weeklyExpense.length > 0 && (
+                          <DownloadButton
+                            isPremiumUser={isPremiumUser}
+                            fileName={`Download_${selectedData}`}
+                          />
+                        )}
+
+                      {selectedData === "monthly" && resData.length > 0 && (
+                        <DownloadButton
+                          isPremiumUser={isPremiumUser}
+                          fileName={`Download_${selectedData}`}
+                          getExpenseDataHandler={getExpenseDataHandler(resData)}
+                        />
+                      )}
+
+                      {selectedData === "yearly" &&
+                        yearlyExpenseData.length > 0 && (
+                          <DownloadButton
+                            isPremiumUser={isPremiumUser}
+                            fileName={`Download_${selectedData}`}
+                            className="bg-blue-500 text-white"
+                            getExpenseDataHandler={getExpenseDataHandler(
+                              yearlyExpenseData
+                            )}
+                          />
+                        )}
+                    </>
+                  )}
                 </li>
               </ul>
             </nav>
             <div class="row">
+              <div class="col-sm-4" style={{ background: '#2c3e50' }}>
+                <div class="card" style={{ background: '#2c3e50' }}>
+                  <div class="card-body" style={{ background: '#2c3e50' }}>
+                    <h5
+                      class="card-title text-white"
+                      style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                    >
+                      Total Expense
+                    </h5>
+                    <p class="card-text text-white">₹{transactions.totalExpense}</p>
+                    <button
+                      onClick={() => fetchTransactions()}
+                      type="button"
+                      style={{ fontFamily: "sanserif", marginRight: "10px",
+                      background: '#2c3e50' }}
+                      class="btn btn-primary"
+                    >
+                      Total Expense
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div class="col-sm-4">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Expense</h5>
-                    <p class="card-text"> ₹12542554</p>
-                    <a href="#" class="btn btn-primary">
-                      Go somewhere
-                    </a>
+                <div class="card" style={{ background: '#2c3e50' }}>
+                  <div class="card-body" style={{ background: '#2c3e50' }}>
+                    <h5
+                      class="card-title text-white" style={{ background: '#2c3e50' 
+                     , fontFamily: "sanserif", marginRight: "10px" }}
+                    >
+                      Total Income
+                    </h5>
+                    <p class="card-text text-white"> ₹{totalIncoomeData}</p>
+                    <button class="btn btn-primary" onClick={() => getIncome()} style={{ background: '#2c3e50' }}>
+                      Total Income
+                    </button>
                   </div>
                 </div>
               </div>
               <div class="col-sm-4">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Total Revenue</h5>
-                    <p class="card-text"> ₹2222222</p>
-                    <a href="#" class="btn btn-primary">
-                      Go somewhere
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Total incomes</h5>
-                    <p class="card-text"> ₹30000</p>
-                    <a href="#" class="btn btn-primary">
-                      Go somewhere
-                    </a>
+                <div class="card" style={{ background: '#2c3e50' }}>
+                  <div class="card-body" style={{ background: '#2c3e50' }}>
+                    <h5 class="card-title text-white"  style={{ fontFamily: "sanserif", marginRight: "10px" }}>Total profit</h5>
+                    <p class="card-text text-white"> ₹{totalProfit}</p>
+                    <button class="btn btn-primary text-white" style={{ background: '#2c3e50' }} >Total profit</button>
                   </div>
                 </div>
               </div>
@@ -363,225 +436,275 @@ const Dashboard = () => {
               class="scrollspy-example bg-body-tertiary p-3 rounded-2"
               tabindex="0"
             >
-              <h5 id="scrollspyHeading1">
+              {selectedTimePeriod === "weekly" && (
+                <h5>
+                  <div className="container">
+                    <h5
+                      className="text-center mt-4 mb-3"
+                      style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                    >
+                     {weeklyExpense.length>0?<div className="text-white">Weekly Expense</div>:<div className="text-white">No Weekly Expense Found</div>} 
+                    </h5>
+                    {weeklyExpense.length > 0 ? (
+                      <table className="table  table-striped">
+                        <thead className="thead-info">
+                          <tr  className="text-white"
+                            style={{ backgroundColor: "#3498db"
+                            
+                              ,fontFamily: "sanserif",
+                              marginRight: "10px",
+                            }}
+                          >
+                            <th scope="col">Date</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Income</th>
+                            <th scope="col">Expense</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {weeklyExpense.map((data) => (
+                            <tr className="text-white b-0" key={data.id}   style={{ fontFamily: "sanserif", marginRight: "10px",border:"1px" }}>
+                              <td>
+                                {new Date(data.createdAt).toLocaleString()}
+                              </td>
+                              <td>{data.description}</td>
+                              <td>{data.catogary}</td>
+                              <td>--</td>
+                              <td>{data.amount}</td>
+                            </tr>
+                          ))}
+                          <tr  className="bg-blue-500 text-white" style={{ border: 'none' }}>
+                            <td style={{ border: 'none' }}></td>
+                            <td style={{ border: 'none' }}></td>
+                            <td style={{ border: 'none' }}></td>
+                            <td
+                              style={{
+                                fontFamily: "sanserif",
+                                marginRight: "10px",
+                               border: 'none' }}
+                            >
+                              Total income = ₹ {totalIncoomeData}
+                            </td>
+                            <td
+                              style={{
+                                fontFamily: "sanserif",
+                                marginRight: "10px",
+                               border: 'none' }}
+                            >
+                              {" "}
+                              Weekly total expense = ₹ {weeklyTotalExpense}{" "}
+                            </td>
+                          </tr>
+                          <tr  className="text-white bf-blue-500" style={{ border: 'none' }}>
+                            <td style={{ border: 'none' }}></td>
+                            <td style={{ border: 'none' }}></td>
+                            <td style={{ border: 'none' }}></td>
+                            <td style={{ border: 'none' }}></td>
+                            <td
+                              style={{
+                                fontFamily: "sanserif",
+                                marginRight: "10px",
+                              border: 'none' }}
+                            >
+                              savings = ₹
+                              {parseInt(totalIncoomeData, 10) -
+                                parseInt(weeklyTotalExpense, 10)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p
+                      className="mt-4 mb-3 w-full object-fit-cover"
+                      style={{ fontFamily: "sans-serif", marginRight: "10px", position: "relative" }}
+                    >
+                      <img
+                        src="https://t3.ftcdn.net/jpg/05/61/33/26/240_F_561332618_4Pe7Jpro00VZF2c2e2AgLKIZNYt3A8gI.jpg"
+                        style={{ width: "100%", height: "350px", borderRadius: "8px" }}
+                        alt="No data available"
+                      />
+                    </p>
+                    
+                    )}
+                  </div>
+                </h5>
+              )}
+
+              {selectedTimePeriod == "monthly" && (
                 <div className="container">
-                  <h5 className="text-center mt-4 mb-3">Daily Expense</h5>
-                  <table className="table  table-bordered">
+                  <h5
+                    className="text-center mt-4 mb-3 text-white"
+                    style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                  >
+                    Monthly Expense
+                  </h5>
+                  <table className="table   table-striped">
                     <thead className="thead-info">
-                      <tr style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
+                      <tr className="text-white"
+                        style={{ backgroundColor: "#3498db",fontFamily: "sanserif", marginRight: "10px"  }}
+                       
+                      >
                         <th scope="col">Date</th>
                         <th scope="col">Description</th>
                         <th scope="col">Category</th>
                         <th scope="col">Income</th>
                         <th scope="col">Expense</th>
                       </tr>
+                      <tr></tr>
                     </thead>
 
                     <tbody>
-                      <tr>
-                        <td>1-2-2021</td>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                        <td>@mdo</td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                        <td>@fat</td>
-                      </tr>
-                      <tr>
-                        <td >3</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                        <td>@fat</td>
-                      </tr>
-                      <tr>
-                        <td >4</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                        <td>@fat</td>
-                      </tr>
+                      {resData.map((data) => {
+                        return (
+                          <tr  className="text-white"  style={{ fontFamily: "sanserif", marginRight: "10px" }}>
+                            <td>{new Date(data.createdAt).toLocaleString()}</td>
+
+                            <td>{data.description}</td>
+                            <td>{data.catogary}</td>
+                            <td>--</td>
+                            <td>{data.amount}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
+                    <tr  className="text-white bg-blue-500">
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td
+                        style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                      >
+                        Total income = ₹ {totalIncoomeData}
+                      </td>
+                      <td
+                        style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                      >
+                        {" "}
+                        Monthly expense ₹{amountData}{" "}
+                      </td>
+                    </tr>
+                    <tr className="bg-blue-500 text-white">
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+
+                      <td
+                        style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                      >
+                        savings = ₹
+                        {parseInt(totalIncoomeData, 10) -
+                          parseInt(amountData, 10)}
+                      </td>
+                    </tr>
                   </table>
                 </div>
-              </h5>
-            
-              <p>...</p>
-              <div className="container">
-                  <h5 className="text-center mt-4 mb-3">Monthly Expense</h5>
-                  <table className="table  table-bordered">
-                    <thead className="thead-info">
-                      <tr style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}>
-                        <th scope="col">Date</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Category</th>
-                        <th scope="col">Income</th>
-                        <th scope="col">Expense</th>
-                      </tr>
-                    </thead>
+              )}
 
-                    <tbody>
-                      <tr>
-                        <td>1</td>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                        <td>@mdo</td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                        <td>@fat</td>
-                      </tr>
-                      <tr>
-                        <td colSpan="2">3</td>
-                        <td>Larry the Bird</td>
-                        <td>@twitter</td>
-                        <td>@twitter</td>
-                      </tr>
-                      <tr>
-                        <td colSpan="2">4</td>
-                        <td>Bird</td>
-                        <td>@twitter</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              
-              <p>...</p>
-              <h5 id="scrollspyHeading3">
-              <h5 className="text-center mt-4 mb-3">Yearly Expense</h5>
-              <div className="container">
-                 
-              
+              {selectedTimePeriod === "yearly" && (
+                <h5>
+                  <h5
+                    className="text-center mt-4 mb-3 text-white"
+                    style={{ fontFamily: "sanserif", marginRight: "10px" }}
+                  >
+                    Yearly expense
+                  </h5>
+                  <div className="container">
+                    <table className="table   table-striped">
+                      <thead className="thead-info">
+                        <tr className="text-white"
+                          style={{ backgroundColor: "#3498db",fontFamily: "sanserif",
+                          marginRight: "10px", }}
+                       
+                        >
+                          <th scope="col">Date</th>
+                          <th scope="col">Description</th>
+                          <th scope="col">Category</th>
+                          <th scope="col">Income</th>
+                          <th scope="col">Expense</th>
+                        </tr>
+                        <tr></tr>
+                      </thead>
 
-                    <table class="table align-middle mb-0 bg-white">
-  <thead class="bg-light">
-    <tr>
-      <th>Name</th>
-      <th>Title</th>
-      <th>Status</th>
-      <th>Position</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>
-        <div class="d-flex align-items-center">
-          <img
-              src="https://mdbootstrap.com/img/new/avatars/8.jpg"
-              alt=""
-              style={{width:" 45px",height:"45px"}}
-              class="rounded-circle"
-              />
-          <div class="ms-3">
-            <p class="fw-bold mb-1">John Doe</p>
-            <p class="text-muted mb-0">john.doe@gmail.com</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="fw-normal mb-1">Software engineer</p>
-        <p class="text-muted mb-0">IT department</p>
-      </td>
-      <td>
-        <span class="badge badge-success rounded-pill d-inline">Active</span>
-      </td>
-      <td>Senior</td>
-      <td>
-        <button type="button" class="btn btn-link btn-sm btn-rounded">
-          Edit
-        </button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="d-flex align-items-center">
-          <img
-              src="https://mdbootstrap.com/img/new/avatars/6.jpg"
-              class="rounded-circle"
-              alt=""
-              style={{width:" 45px",height:"45px"}}
-              />
-          <div class="ms-3">
-            <p class="fw-bold mb-1">Alex Ray</p>
-            <p class="text-muted mb-0">alex.ray@gmail.com</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="fw-normal mb-1">Consultant</p>
-        <p class="text-muted mb-0">Finance</p>
-      </td>
-      <td>
-        <span class="badge badge-primary rounded-pill d-inline"
-              >Onboarding</span
-          >
-      </td>
-      <td>Junior</td>
-      <td>
-        <button
-                type="button"
-                class="btn btn-link btn-rounded btn-sm fw-bold"
-                data-mdb-ripple-color="dark"
-                >
-          Edit
-        </button>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div class="d-flex align-items-center">
-          <img
-              src="https://mdbootstrap.com/img/new/avatars/7.jpg"
-              class="rounded-circle"
-              alt=""
-              style={{width:" 45px", height:" 45px"}}
-              />
-          <div class="ms-3">
-            <p class="fw-bold mb-1">Kate Hunington</p>
-            <p class="text-muted mb-0">kate.hunington@gmail.com</p>
-          </div>
-        </div>
-      </td>
-      <td>
-        <p class="fw-normal mb-1">Designer</p>
-        <p class="text-muted mb-0">UI/UX</p>
-      </td>
-      <td>
-        <span class="badge badge-warning rounded-pill d-inline">Awaiting</span>
-      </td>
-      <td>Senior</td>
-      <td>
-        <button
-                type="button"
-                class="btn btn-link btn-rounded btn-sm fw-bold"
-                data-mdb-ripple-color="dark"
-                >
-          Edit
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-                  
-                </div>
-              </h5>
+                      <tbody>
+                        {yearlyExpenseData.map((data) => {
+                          return (
+                            <tr
+                            className="text-white"
+                              style={{
+                                fontFamily: "sanserif",
+                                marginRight: "10px",
+                              }}
+                            >
+                              <td>
+                                {new Date(data.createdAt).toLocaleString()}
+                              </td>
+
+                              <td>{data.description}</td>
+                              <td>{data.catogary}</td>
+                              <td>--</td>
+                              <td>{data.amount}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tr style={{ backgroundColor: "#3498db" }}>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td> </td>
+                      </tr>
+                      <tr  className="text-white bg-blue-500">
+                        <td className="bg-blue-500 text-white"></td>
+                        <td className="bg-blue-500 text-white"></td>
+                        <td className="bg-blue-500 text-white"></td>
+                        <td
+                          style={{
+                            fontFamily: "sanserif",
+                            marginRight: "10px",
+                          }}
+                          className="bg-blue-500 text-white"
+                        >
+                          Total income = ₹ {totalIncoomeData}
+                        </td>
+                        <td
+                          style={{
+                            fontFamily: "sanserif",
+                            marginRight: "10px",
+                          }}
+                        >
+                          {" "}
+                          Yearly total expense ₹ {yearlyTotalExpense}{" "}
+                        </td>
+                      </tr>
+                      <tr className="bg-blue-500 text-white">
+                        <td className="bg-blue-500 text-white"></td>
+                        <td className="bg-blue-500 text-white"></td>
+                        <td className="bg-blue-500 text-white"></td>
+                        <td className="bg-blue-500 text-white"></td>
+                        <td
+                          style={{
+                            fontFamily: "sanserif",
+                          
+                          }} 
+                          className="bg-blue-500 text-white"
+                        >
+                          savings = ₹
+                          {parseInt(totalIncoomeData, 10) -
+                            parseInt(yearlyTotalExpense, 10)}
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                </h5>
+              )}
             </div>
           </div>
         </main>
-        {/* <!--Main layout--> */}
         <Footer></Footer>
       </div>
-     
     </>
   );
 };
