@@ -8,6 +8,10 @@
 
 ![Screenshot (112)](https://github.com/radheshyamgupta01/expense-tracker-frontend/assets/142769686/a5afb89e-26f4-4238-9195-bceb40c56c17)
 
+# Dashboard 
+
+![Screenshot (119)](https://github.com/radheshyamgupta01/expense-tracker-frontend/assets/142769686/e25a1be7-e99b-44a6-90a4-d85682dde162)
+
 
 
 
